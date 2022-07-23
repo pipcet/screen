@@ -949,12 +949,13 @@ void Redisplay(int cur_only)
 	SetRendition(&mchar_null);
 	SetFlow(FLOW_ON);
 
-	ClearAll();
+	/* Don't do this, it causes unacceptable flashing on a non-accelerated 4k console. */
+	/* ClearAll(); */
 	RefreshXtermOSC();
 	if (cur_only > 0 && D_fore)
-		RefreshArea(0, D_fore->w_y, D_width - 1, D_fore->w_y, 1);
+		RefreshArea(0, D_fore->w_y, D_width - 1, D_fore->w_y, 0);
 	else
-		RefreshAll(1);
+		RefreshAll(0);
 	RefreshHStatus();
 	CV_CALL(D_forecv, LayRestore();
 		LaySetCursor());
@@ -1722,7 +1723,8 @@ void RefreshAll(int isblank)
 		CV_CALL(cv, LayRedisplayLine(-1, -1, -1, isblank));
 		display = cv->c_display;	/* just in case! */
 	}
-	RefreshArea(0, 0, D_width - 1, D_height - 1, isblank);
+	for (int y = 0; y < D_height; y++)
+		RefreshArea(0, y, D_width - 1, y, isblank);
 }
 
 void RefreshArea(int xs, int ys, int xe, int ye, int isblank)
